@@ -13,7 +13,7 @@ Puppet::Type.type(:ini_setting).provide(
     File.join(@file_path, file_name)
   end
 
-  def self.set_file_path(path)
+  def self.set_file_path(path) # rubocop:disable Style/AccessorMethodName
     @file_path = path
   end
 end
