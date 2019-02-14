@@ -24,10 +24,10 @@
 
 ## Overview
 
-This module provides a method to deploy Splunk Server or Splunk Universal Forwarder
-with common configurations and ensure the services maintain a running
-state. It provides types/providers to interact with the various Splunk/Forwarder
-configuration files.
+This module provides a method to deploy Splunk Enterprise or Splunk Universal
+Forwarder with common configurations and ensure the services maintain a running
+state. It provides types/providers to interact with the various
+Splunk/Forwarder configuration files.
 
 ## Module Description
 
@@ -44,8 +44,10 @@ or apt to install these components if they're self-hosted.
 
 * Installs the Splunk/Forwarder package and manages their config files. It does
   not purge them by default.
-* The module will set up both Splunk and Splunkforwarder to run as the 'root'
-  user on POSIX platforms.
+* The module will set up both Splunk Enterprise and Splunk Forwarder to run as
+  the 'root' user on POSIX platforms.
+* By default, enables Splunk Enterprise and Splunk Forwarder boot-start, and
+  uses the vendor-generated service file to manage the splunk service.
 
 ### Setup Requirements
 
@@ -125,11 +127,12 @@ Puppet Server in the modulepath the module is ready to deploy.
 
 ## Usage
 
-If a user is installing Splunk with packages provided from their modulepath,
-this is the most basic way of installing Splunk Server with default settings:
+If a user is installing Splunk Enterprise with packages provided from their
+modulepath, this is the most basic way of installing Splunk Server with default
+settings:
 
 ```puppet
-include ::splunk
+include ::splunk::enterprise
 ```
 
 This is the most basic way of installing the Splunk Universal Forwarder with
@@ -166,6 +169,8 @@ the inputs.conf file and refresh the service.
 ### Upgrade splunk/splunkforwarder packages
 
 This module has the ability to install *and* upgrade the splunk and splunkforwarder packages. All you have to do is declare `package_ensure => 'latest'` when calling the `::splunk` or `::splunk::forwarder` classes.
+
+Upgrades from 7.0.X to >= 7.X.X are not tested.
 
 #### Upgrade Example
 
@@ -298,7 +303,11 @@ both splunk and splunk::forwarder.
 *Optional* The fqdn or IP address of the Splunk server. Used for setting up the
 default TCP output and input.
 
-### Class: ::splunk Parameters
+#### `boot_start`
+
+*Optional* Enable splunk boot-start mode.  Provision a service file.
+
+### Class: ::splunk::enterprise Parameters
 
 #### `package_source`
 
@@ -389,6 +398,26 @@ is no longer managed by the splunk_transforms type. Default to false.
 *Optional* If set to true, web.conf will be purged of configuration that is no
 longer managed by the splunk_web type. Default to false.
 
+#### `manage_password`
+
+If set to true, Manage the contents of splunk.secret and passwd
+
+#### `password_config_file`
+
+Which file to put the password in i.e. in linux it would be /opt/splunk/etc/passwd
+
+#### `password_content`
+
+The hashed password username/details for the user
+
+#### `secret_file`
+
+Which file we should put the secret in
+
+#### `secret`
+
+The secret used to salt the splunk password
+
 ### Class ::splunk::forwarder Parameters
 
 #### `server`
@@ -477,15 +506,38 @@ Used to override the default forwarder_input type defined in ::splunk::params.
 
 Used to override the default forwarder_output type defined in ::splunk::params.
 
-#### `create_password`
+#### `manage_password`
 
-Not yet implemented.
+If set to true, Manage the contents of splunk.secret and passwd
+
+#### `password_config_file`
+
+Which file to put the password in i.e. in linux it would be /opt/splunkforwarder/etc/passwd
+
+#### `password_content`
+
+The hashed password username/details for the user
+
+#### `secret_file`
+
+Which file we should put the secret in
+
+#### `secret`
+
+The secret used to salt the splunk password
 
 ## Limitations
 
 - Currently tested manually on Centos 7, but we will eventually add automated
   testing and are targeting compatibility with other platforms.
 - Tested with Puppet 4.x
+- New installations of splunk up to version 7.2.X are supported, but upgrades
+  from  7.0.X to >= 7.X.X are not fully tested
+- Enabling boot-start will fail if the unit file already exists.  Splunk does
+  not remove unit files during uninstallation, so you may be required to
+  manually remove existing unit files before re installing and enabling
+  boot-start.
+
 
 ## Development
 

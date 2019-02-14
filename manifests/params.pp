@@ -73,6 +73,13 @@
 #                         ├── splunk-7.0.0-c8a78efdd40f-linux-2.6-intel.deb
 #                         └── splunk-7.0.0-c8a78efdd40f-linux-2.6-x86_64.rpm
 #
+# [*boot_start*]
+#   Enable Splunk to start at boot, create a system service file.
+#
+#   WARNING: Toggling boot_start `false` to `true` will cause a restart of the
+#   splunk Enterprise and Forwarder services.
+#
+#   Defaults to true
 #
 # Actions:
 #
@@ -81,18 +88,19 @@
 # Requires: nothing
 #
 class splunk::params (
-  String $version                        = '7.0.0',
-  String $build                          = 'c8a78efdd40f',
-  String $src_root                       = 'https://download.splunk.com',
-  Stdlib::Port $splunkd_port             = 8089,
-  Stdlib::Port $logging_port             = 9997,
-  String $server                         = 'splunk',
-  Optional[String] $forwarder_installdir = undef,
-  Optional[String] $server_installdir    = undef,
-  String $splunk_user                    = $facts['os']['family'] ? {
+  String $version                         = '7.0.0',
+  String $build                           = 'c8a78efdd40f',
+  String $src_root                        = 'https://download.splunk.com',
+  Stdlib::Port $splunkd_port              = 8089,
+  Stdlib::Port $logging_port              = 9997,
+  String $server                          = 'splunk',
+  Optional[String] $forwarder_installdir  = undef,
+  Optional[String] $enterprise_installdir = undef,
+  Boolean $boot_start                     = true,
+  String $splunk_user                     = $facts['os']['family'] ? {
     'Windows' => 'Administrator',
     default => 'root'
-  }
+  },
 ) {
 
   # Based on the small number of inputs above, we can construct sane defaults
@@ -100,55 +108,83 @@ class splunk::params (
 
   # Settings common to everything
   $staging_subdir = 'splunk'
-  #password setting settings - default changeme
+
+  # To generate password_content, change the password on enterprise or
+  # forwarder, then distribute the contents of the splunk.secret and passwd
+  # files accross all nodes.
+  # By default the parameters provided are for admin/changeme password.
+  $manage_password  = false
   $secret           = 'hhy9DOGqli4.aZWCuGvz8stcqT2/OSJUZuyWHKc4wnJtQ6IZu2bfjeElgYmGHN9RWIT3zs5hRJcX1wGerpMNObWhFue78jZMALs3c3Mzc6CzM98/yGYdfcvWMo1HRdKn82LVeBJI5dNznlZWfzg6xdywWbeUVQZcOZtODi10hdxSJ4I3wmCv0nmkSWMVOEKHxti6QLgjfuj/MOoh8.2pM0/CqF5u6ORAzqFZ8Qf3c27uVEahy7ShxSv2K4K41z'
   $password_content = ':admin:$6$pIE/xAyP9mvBaewv$4GYFxC0SqonT6/x8qGcZXVCRLUVKODj9drDjdu/JJQ/Iw0Gg.aTkFzCjNAbaK4zcCHbphFz1g1HK18Z2bI92M0::Administrator:admin:changeme@example.com::'
 
-
   if $::osfamily == 'Windows' {
-    $forwarder_dir = pick($forwarder_installdir, 'C:\\Program Files\\SplunkUniversalForwarder')
-    $server_dir    = pick($server_installdir, 'C:/Program Files/Splunk')
+    $enterprise_homedir = pick($enterprise_installdir, 'C:/Program Files/Splunk')
+    $forwarder_homedir  = pick($forwarder_installdir, 'C:\\Program Files\\SplunkUniversalForwarder')
   } else {
-    $forwarder_dir = pick($forwarder_installdir, '/opt/splunkforwarder')
-    $server_dir    = pick($server_installdir, '/opt/splunk')
+    $enterprise_homedir = pick($enterprise_installdir, '/opt/splunk')
+    $forwarder_homedir  = pick($forwarder_installdir, '/opt/splunkforwarder')
   }
 
   # Settings common to a kernel
   case $::kernel {
     'Linux': {
-      $path_delimiter       = '/'
-      $forwarder_src_subdir = 'linux'
-      $forwarder_service    = [ 'splunk' ]
-      $password_config_file = "${forwarder_dir}/etc/passwd"
-      $secret_file          = "${forwarder_dir}/etc/splunk.secret"
-      $forwarder_confdir    = "${forwarder_dir}/etc"
-      $server_src_subdir    = 'linux'
-      $server_service       = [ 'splunk', 'splunkd', 'splunkweb' ]
-      $server_confdir       = "${server_dir}/etc"
-      $forwarder_install_options = undef
+      $path_delimiter                      = '/'
+      $forwarder_src_subdir                = 'linux'
+      $forwarder_password_config_file      = "${forwarder_homedir}/etc/passwd"
+      $enterprise_password_config_file     = "${enterprise_homedir}/etc/passwd"
+      $forwarder_secret_file               = "${forwarder_homedir}/etc/splunk.secret"
+      $enterprise_secret_file              = "${enterprise_homedir}/etc/splunk.secret"
+      $forwarder_confdir                   = "${forwarder_homedir}/etc"
+      $enterprise_src_subdir               = 'linux'
+      $enterprise_confdir                  = "${enterprise_homedir}/etc"
+      $forwarder_install_options           = undef
+      # Systemd not supported until Splunk 7.2.2
+      if $facts['service_provider'] == 'systemd' and versioncmp($version, '7.2.2') >= 0 {
+        $enterprise_service      = 'Splunkd'
+        $forwarder_service       = 'SplunkForwarder'
+        $enterprise_service_file = '/etc/systemd/system/multi-user.target.wants/Splunkd.service'
+        $forwarder_service_file  = '/etc/systemd/system/multi-user.target.wants/SplunkForwarder.service'
+      }
+      else {
+        $enterprise_service      = 'splunk'
+        $forwarder_service       = 'splunk'
+        $enterprise_service_file = '/etc/init.d/splunk'
+        $forwarder_service_file  = '/etc/init.d/splunk'
+      }
     }
     'SunOS': {
-      $path_delimiter       = '/'
-      $forwarder_src_subdir = 'solaris'
-      $forwarder_service    = [ 'splunk' ]
-      $password_config_file = "${forwarder_dir}/etc/passwd"
-      $secret_file          = "${forwarder_dir}/etc/splunk.secret"
-      $forwarder_confdir    = "${forwarder_dir}/etc"
-      $server_src_subdir    = 'solaris'
-      $server_service       = [ 'splunk', 'splunkd', 'splunkweb' ]
-      $server_confdir       = "${server_dir}/etc"
+      $path_delimiter        = '/'
+      $forwarder_src_subdir  = 'solaris'
+      $password_config_file  = "${forwarder_homedir}/etc/passwd"
+      $secret_file           = "${forwarder_homedir}/etc/splunk.secret"
+      $forwarder_confdir     = "${forwarder_homedir}/etc"
+      $enterprise_src_subdir = 'solaris'
+      $enterprise_confdir    = "${enterprise_homedir}/etc"
       $forwarder_install_options = undef
+      # Systemd not supported until Splunk 7.2.2
+      if $facts['service_provider'] == 'systemd' and versioncmp($version, '7.2.2') >= 0 {
+        $enterprise_service      = 'Splunkd'
+        $forwarder_service       = 'SplunkForwarder'
+        $enterprise_service_file = '/etc/systemd/system/multi-user.target.wants/Splunkd.service'
+        $forwarder_service_file  = '/etc/systemd/system/multi-user.target.wants/SplunkForwarder.service'
+      }
+      else {
+        $enterprise_service      = 'splunk'
+        $forwarder_service       = 'splunk'
+        $enterprise_service_file = '/etc/init.d/splunk'
+        $forwarder_service_file  = '/etc/init.d/splunk'
+      }
     }
     'Windows': {
-      $path_delimiter       = '\\'
-      $forwarder_src_subdir = 'windows'
-      $password_config_file = 'C:/Program Files/SplunkUniversalForwarder/etc/passwd'
-      $secret_file          =  'C:/Program Files/SplunkUniversalForwarder/etc/splunk.secret'
-      $forwarder_service    = [ 'SplunkForwarder' ] # UNKNOWN
-      $forwarder_confdir    = "${forwarder_dir}/etc"
-      $server_src_subdir    = 'windows'
-      $server_service       = [ 'Splunkd', 'SplunkWeb' ] # UNKNOWN
-      $server_confdir       = "${server_dir}/etc"
+      $path_delimiter        = '\\'
+      $forwarder_src_subdir  = 'windows'
+      $password_config_file  = 'C:/Program Files/SplunkUniversalForwarder/etc/passwd'
+      $secret_file           =  'C:/Program Files/SplunkUniversalForwarder/etc/splunk.secret'
+      $forwarder_service     = 'SplunkForwarder' # UNKNOWN
+      $forwarder_confdir     = "${forwarder_homedir}/etc"
+      $enterprise_src_subdir = 'windows'
+      $enterprise_service    = 'splunkd' # UNKNOWN
+      $enterprise_confdir    = "${enterprise_homedir}/etc"
       $forwarder_install_options = [
         'AGREETOLICENSE=Yes',
         'LAUNCHSPLUNK=0',
@@ -159,9 +195,9 @@ class splunk::params (
         'WINEVENTLOG_FWD_ENABLE=1',
         'WINEVENTLOG_SET_ENABLE=1',
         'ENABLEADMON=1',
-        { 'INSTALLDIR' => $forwarder_dir },
+        { 'INSTALLDIR' => $forwarder_homedir },
       ]
-      $server_install_options = [
+      $enterprise_install_options = [
         'LAUNCHSPLUNK=1',
         'WINEVENTLOG_APP_ENABLE=1',
         'WINEVENTLOG_SEC_ENABLE=1',
@@ -198,72 +234,71 @@ class splunk::params (
   }
   # Settings common to an OS family
   case $::osfamily {
-    'RedHat':  { $pkg_provider = 'rpm'  }
-    'Debian':  { $pkg_provider = 'dpkg' }
-    'Solaris': { $pkg_provider = 'sun'  }
-    default:   { $pkg_provider = undef  } # Don't define a $pkg_provider
+    'RedHat':  { $package_provider = 'rpm'  }
+    'Debian':  { $package_provider = 'dpkg' }
+    'Solaris': { $package_provider = 'sun'  }
+    default:   { $package_provider = undef  } # Don't define a $package_provider
   }
 
   # Settings specific to an architecture as well as an OS family
   case "${::osfamily} ${::architecture}" {
     'RedHat i386': {
-      $package_suffix       = "${version}-${build}.i386.rpm"
-      $forwarder_pkg_name   = 'splunkforwarder'
-      $server_pkg_name      = 'splunk'
+      $package_suffix          = "${version}-${build}.i386.rpm"
+      $forwarder_package_name  = 'splunkforwarder'
+      $enterprise_package_name = 'splunk'
     }
     'RedHat x86_64': {
-      $package_suffix       = "${version}-${build}-linux-2.6-x86_64.rpm"
-      $forwarder_pkg_name   = 'splunkforwarder'
-      $server_pkg_name      = 'splunk'
+      $package_suffix          = "${version}-${build}-linux-2.6-x86_64.rpm"
+      $forwarder_package_name  = 'splunkforwarder'
+      $enterprise_package_name = 'splunk'
     }
     'Debian i386': {
-      $package_suffix       = "${version}-${build}-linux-2.6-intel.deb"
-      $forwarder_pkg_name   = 'splunkforwarder'
-      $server_pkg_name      = 'splunk'
+      $package_suffix          = "${version}-${build}-linux-2.6-intel.deb"
+      $forwarder_package_name  = 'splunkforwarder'
+      $enterprise_package_name = 'splunk'
     }
     'Debian amd64': {
-      $package_suffix       = "${version}-${build}-linux-2.6-amd64.deb"
-      $forwarder_pkg_name   = 'splunkforwarder'
-      $server_pkg_name      = 'splunk'
+      $package_suffix          = "${version}-${build}-linux-2.6-amd64.deb"
+      $forwarder_package_name  = 'splunkforwarder'
+      $enterprise_package_name = 'splunk'
     }
     /^(W|w)indows (x86|i386)$/: {
-      $package_suffix       = "${version}-${build}-x86-release.msi"
-      $forwarder_pkg_name   = 'UniversalForwarder'
-      $server_pkg_name      = 'Splunk'
+      $package_suffix          = "${version}-${build}-x86-release.msi"
+      $forwarder_package_name  = 'UniversalForwarder'
+      $enterprise_package_name = 'Splunk'
     }
     /^(W|w)indows (x64|x86_64)$/: {
-      $package_suffix       = "${version}-${build}-x64-release.msi"
-      $forwarder_pkg_name   = 'UniversalForwarder'
-      $server_pkg_name      = 'Splunk'
+      $package_suffix          = "${version}-${build}-x64-release.msi"
+      $forwarder_package_name  = 'UniversalForwarder'
+      $enterprise_package_name = 'Splunk'
     }
     'Solaris i86pc': {
-      $package_suffix       = "${version}-${build}-solaris-10-intel.pkg"
-      $forwarder_pkg_name   = 'splunkforwarder'
-      $server_pkg_name      = 'splunk'
+      $package_suffix          = "${version}-${build}-solaris-10-intel.pkg"
+      $forwarder_package_name  = 'splunkforwarder'
+      $enterprise_package_name = 'splunk'
     }
     'Solaris sun4v': {
-      $package_suffix       = "${version}-${build}-solaris-8-sparc.pkg"
-      $forwarder_pkg_name   = 'splunkforwarder'
-      $server_pkg_name      = 'splunk'
+      $package_suffix          = "${version}-${build}-solaris-8-sparc.pkg"
+      $forwarder_package_name  = 'splunkforwarder'
+      $enterprise_package_name = 'splunk'
     }
     default: { fail("unsupported osfamily/arch ${::osfamily}/${::architecture}") }
   }
 
-  $forwarder_src_pkg = "splunkforwarder-${package_suffix}"
-  $server_src_pkg    = "splunk-${package_suffix}"
+  $forwarder_src_package  = "splunkforwarder-${package_suffix}"
+  $enterprise_src_package = "splunk-${package_suffix}"
 
-  $server_pkg_ensure = 'installed'
-  $server_pkg_src    = "${src_root}/products/splunk/releases/${version}/${server_src_subdir}/${server_src_pkg}"
-  $forwarder_pkg_src = "${src_root}/products/universalforwarder/releases/${version}/${forwarder_src_subdir}/${forwarder_src_pkg}"
-  $create_password   = true
+  $enterprise_package_ensure = 'installed'
+  $enterprise_package_src    = "${src_root}/products/splunk/releases/${version}/${enterprise_src_subdir}/${enterprise_src_package}"
+  $forwarder_package_ensure = 'installed'
+  $forwarder_package_src = "${src_root}/products/universalforwarder/releases/${version}/${forwarder_src_subdir}/${forwarder_src_package}"
 
-  $forwarder_pkg_ensure = 'installed'
 
   # A meta resource so providers know where splunk is installed:
   splunk_config { 'splunk':
-    forwarder_installdir => $forwarder_dir,
+    forwarder_installdir => $forwarder_homedir,
     forwarder_confdir    => $forwarder_confdir,
-    server_installdir    => $server_dir,
-    server_confdir       => $server_confdir,
+    server_installdir    => $enterprise_homedir,
+    server_confdir       => $enterprise_confdir,
   }
 }
