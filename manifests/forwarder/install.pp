@@ -61,7 +61,9 @@ class splunk::forwarder::install {
 
   #TODO: this should ensure on specified version
   package { $::splunk::forwarder::forwarder_package_name:
-    ensure   => $::splunk::forwarder::forwarder_package_ensure,
+    ensure          => $::splunk::forwarder::forwarder_package_ensure,
+    provider        => $::splunk::forwarder::package_provider,
+    install_options => $::splunk::forwarder::install_options,
   }
 
 }

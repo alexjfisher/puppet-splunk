@@ -9,7 +9,7 @@ shared_examples_for 'splunk forwarder' do
   it { is_expected.to contain_class('splunk::forwarder::config') }
   it { is_expected.to contain_class('splunk::forwarder::service') }
   it { is_expected.to contain_splunk_config('splunk') }
-  it { is_expected.to contain_package('splunkforwarder').with(ensure: 'installed', source: nil) }
+  it { is_expected.to contain_package('splunkforwarder').with(ensure: 'installed') }
   it { is_expected.to contain_file('/opt/splunkforwarder/etc/system/local/deploymentclient.conf') }
   it { is_expected.to contain_file('/opt/splunkforwarder/etc/system/local/outputs.conf') }
   it { is_expected.to contain_file('/opt/splunkforwarder/etc/system/local/inputs.conf') }
@@ -50,6 +50,14 @@ describe 'splunk::forwarder' do
               it { is_expected.to compile.with_all_deps }
               it { is_expected.to contain_file('/opt/splunkforwarder/etc/splunk.secret') }
               it { is_expected.to contain_file('/opt/splunkforwarder/etc/passwd') }
+            end
+          end
+
+          context 'when package_provider = yum' do
+            if facts[:kernel] == 'Linux' || facts[:kernel] == 'SunOS'
+              let(:params) { { 'package_provider' => 'yum' } }
+
+              it { is_expected.to contain_package('splunkforwarder').with(provider: 'yum') }
             end
           end
 

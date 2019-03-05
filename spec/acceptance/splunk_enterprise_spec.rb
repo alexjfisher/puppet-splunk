@@ -1,11 +1,11 @@
 require 'spec_helper_acceptance'
 
-describe 'splunk class' do
+describe 'splunk enterprise class' do
   context 'default parameters' do
     # Using puppet_apply as a helper
     it 'works idempotently with no errors' do
       pp = <<-EOS
-      class { '::splunk': }
+      class { '::splunk::enterprise': }
       EOS
 
       # Run it twice and test for idempotency

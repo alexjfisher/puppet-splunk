@@ -61,7 +61,9 @@ class splunk::enterprise::install {
 
   #TODO: this should ensure on specified version
   package { $::splunk::enterprise::enterprise_package_name:
-    ensure   => $::splunk::enterprise::enterprise_package_ensure,
+    ensure          => $::splunk::enterprise::enterprise_package_ensure,
+    provider        => $::splunk::enterprise::package_provider,
+    install_options => $::splunk::enterprise::install_options,
   }
 
 }

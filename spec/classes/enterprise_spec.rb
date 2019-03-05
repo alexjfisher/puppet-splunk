@@ -9,7 +9,7 @@ shared_examples_for 'splunk enterprise defaults' do
   it { is_expected.to contain_class('splunk::enterprise::config') }
   it { is_expected.to contain_class('splunk::enterprise::service') }
   it { is_expected.to contain_splunk_config('splunk') }
-  it { is_expected.to contain_package('splunk').with(ensure: 'installed', source: nil) }
+  it { is_expected.to contain_package('splunk').with(ensure: 'installed') }
   it { is_expected.to contain_file('/opt/splunk/etc/system/local/alert_actions.conf') }
   it { is_expected.to contain_file('/opt/splunk/etc/system/local/authentication.conf') }
   it { is_expected.to contain_file('/opt/splunk/etc/system/local/authorize.conf') }
@@ -60,6 +60,14 @@ describe 'splunk::enterprise' do
               it { is_expected.to compile.with_all_deps }
               it { is_expected.to contain_file('/opt/splunk/etc/splunk.secret') }
               it { is_expected.to contain_file('/opt/splunk/etc/passwd') }
+            end
+          end
+
+          context 'when package_provider = yum' do
+            if facts[:kernel] == 'Linux' || facts[:kernel] == 'SunOS'
+              let(:params) { { 'package_provider' => 'yum' } }
+
+              it { is_expected.to contain_package('splunk').with(provider: 'yum') }
             end
           end
 
