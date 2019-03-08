@@ -137,8 +137,8 @@ class splunk::params (
       $forwarder_confdir                   = "${forwarder_homedir}/etc"
       $enterprise_src_subdir               = 'linux'
       $enterprise_confdir                  = "${enterprise_homedir}/etc"
-      $forwarder_install_options           = undef
-      $enterprise_install_options           = undef
+      $forwarder_install_options           = []
+      $enterprise_install_options           = []
       # Systemd not supported until Splunk 7.2.2
       if $facts['service_provider'] == 'systemd' and versioncmp($version, '7.2.2') >= 0 {
         $enterprise_service      = 'Splunkd'
@@ -161,8 +161,8 @@ class splunk::params (
       $forwarder_confdir     = "${forwarder_homedir}/etc"
       $enterprise_src_subdir = 'solaris'
       $enterprise_confdir    = "${enterprise_homedir}/etc"
-      $forwarder_install_options = undef
-      $enterprise_install_options = undef
+      $forwarder_install_options = []
+      $enterprise_install_options = []
       # Systemd not supported until Splunk 7.2.2
       if $facts['service_provider'] == 'systemd' and versioncmp($version, '7.2.2') >= 0 {
         $enterprise_service      = 'Splunkd'

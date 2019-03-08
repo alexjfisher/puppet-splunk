@@ -6,10 +6,10 @@ class splunk::enterprise::service {
   # there is non-generic configuration that needs to be declared in addition
   # to the agnostic resources declared here.
   if $facts['kernel'] == 'Linux' or $facts['kernel'] == 'SunOS' {
-    include ::splunk::enterprise::service::nix
+    include splunk::enterprise::service::nix
   }
 
-  service { $::splunk::enterprise::service_name:
+  service { $splunk::enterprise::service_name:
     ensure     => running,
     enable     => true,
     hasstatus  => true,
