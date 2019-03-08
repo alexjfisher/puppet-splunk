@@ -528,6 +528,10 @@ The secret used to salt the splunk password
 
 ## Limitations
 
+- The splunk service (up to 7.2.4.2) will fail to start on systems without
+  cgroups if systemd boot-start is enabled, and the default unit file is
+  present. The unit file assumes cgroups exist, and will fail to start the
+  service if utilized.
 - Currently tested manually on Centos 7, but we will eventually add automated
   testing and are targeting compatibility with other platforms.
 - Tested with Puppet 4.x

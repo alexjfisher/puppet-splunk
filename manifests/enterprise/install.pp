@@ -2,6 +2,10 @@
 #
 class splunk::enterprise::install {
 
+  if $facts['kernel'] == 'Linux' or $facts['kernel'] == 'SunOS' {
+    include splunk::enterprise::install::nix
+  }
+
   $_package_source = $splunk::enterprise::manage_package_source ? {
     true  => $splunk::enterprise::enterprise_package_src,
     false => $splunk::enterprise::package_source
@@ -30,33 +34,6 @@ class splunk::enterprise::install {
         false => $_package_source,
       }
     },
-  }
-
-  if $facts['kernel'] == 'SunOS' {
-    $_responsefile = "${archive::path}/${splunk::enterprise::staging_subdir}/response.txt"
-    $_adminfile    = '/var/sadm/install/admin/splunk-noask'
-
-    file { 'splunk_adminfile':
-      ensure => file,
-      path   => $_adminfile,
-      owner  => 'root',
-      group  => 'root',
-      source => 'puppet:///modules/splunk/splunk-noask',
-    }
-
-    file { 'splunk_pkg_response_file':
-      ensure  => file,
-      owner   => 'root',
-      group   => 'root',
-      path    => $_responsefile,
-      content => "BASEDIR=/opt\n",
-    }
-
-    # Collect any Splunk packages and give them an admin and response file.
-    Package {
-      adminfile    => $_adminfile,
-      responsefile => $_responsefile,
-    }
   }
 
   #TODO: this should ensure on specified version

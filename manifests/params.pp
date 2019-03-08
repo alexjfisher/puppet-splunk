@@ -57,21 +57,21 @@
 #     └── products/
 #         ├── universalforwarder/
 #         │   └── releases/
-#         |       └── 7.0.0/
+#         |       └── 7.2.4.2/
 #         |           ├── linux/
-#         |           |   ├── splunkforwarder-7.0.0-c8a78efdd40f-linux-2.6-amd64.deb
-#         |           |   ├── splunkforwarder-7.0.0-c8a78efdd40f-linux-2.6-intel.deb
-#         |           |   └── splunkforwarder-7.0.0-c8a78efdd40f-linux-2.6-x86_64.rpm
+#         |           |   ├── splunkforwarder-7.2.4.2-fb30470262e3-linux-2.6-amd64.deb
+#         |           |   ├── splunkforwarder-7.2.4.2-fb30470262e3-linux-2.6-intel.deb
+#         |           |   └── splunkforwarder-7.2.4.2-fb30470262e3-linux-2.6-x86_64.rpm
 #         |           ├── solaris/
 #         |           └── windows/
-#         |               └── splunkforwarder-7.0.0-c8a78efdd40f-x64-release.msi
+#         |               └── splunkforwarder-7.2.4.2-fb30470262e3-x64-release.msi
 #         └── splunk/
 #             └── releases/
-#                 └── 7.0.0/
+#                 └── 7.2.4.2/
 #                     └── linux/
-#                         ├── splunk-7.0.0-c8a78efdd40f-linux-2.6-amd64.deb
-#                         ├── splunk-7.0.0-c8a78efdd40f-linux-2.6-intel.deb
-#                         └── splunk-7.0.0-c8a78efdd40f-linux-2.6-x86_64.rpm
+#                         ├── splunk-7.2.4.2-fb30470262e3-linux-2.6-amd64.deb
+#                         ├── splunk-7.2.4.2-fb30470262e3-linux-2.6-intel.deb
+#                         └── splunk-7.2.4.2-fb30470262e3-linux-2.6-x86_64.rpm
 #
 # [*boot_start*]
 #   Enable Splunk to start at boot, create a system service file.
@@ -88,8 +88,8 @@
 # Requires: nothing
 #
 class splunk::params (
-  String[1] $version                         = '7.0.0',
-  String[1] $build                           = 'c8a78efdd40f',
+  String[1] $version                         = '7.2.4.2',
+  String[1] $build                           = 'fb30470262e3',
   String[1] $src_root                        = 'https://download.splunk.com',
   Stdlib::Port $splunkd_port                 = 8089,
   Stdlib::Port $logging_port                 = 9997,

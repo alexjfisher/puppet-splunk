@@ -1,13 +1,15 @@
 require 'spec_helper'
 
-shared_examples_for 'splunk enterprise defaults' do
+shared_examples_for 'splunk enterprise nix defaults' do
   it { is_expected.to compile.with_all_deps }
   it { is_expected.to contain_class('splunk') }
   it { is_expected.to contain_class('splunk::params') }
   it { is_expected.to contain_class('splunk::enterprise') }
   it { is_expected.to contain_class('splunk::enterprise::install') }
+  it { is_expected.to contain_class('splunk::enterprise::install::nix') }
   it { is_expected.to contain_class('splunk::enterprise::config') }
   it { is_expected.to contain_class('splunk::enterprise::service') }
+  it { is_expected.to contain_class('splunk::enterprise::service::nix') }
   it { is_expected.to contain_splunk_config('splunk') }
   it { is_expected.to contain_package('splunk').with(ensure: 'installed') }
   it { is_expected.to contain_file('/opt/splunk/etc/system/local/alert_actions.conf') }
@@ -79,11 +81,11 @@ describe 'splunk::enterprise' do
                   facts.merge(service_provider: 'init')
                 end
                 let(:pre_condition) do
-                  "class { 'splunk::params': version => '7.2.2' }"
+                  "class { 'splunk::params': version => '7.2.4.2' }"
                 end
 
-                it_behaves_like 'splunk enterprise defaults'
-                it { is_expected.to contain_class('splunk::enterprise::service::nix') }
+                it_behaves_like 'splunk enterprise nix defaults'
+                it { is_expected.to contain_package('net-tools').with(ensure: 'installed') }
                 it { is_expected.to contain_class('splunk::enterprise').with(service_name: 'splunk') }
                 it { is_expected.not_to contain_file('/etc/init.d/splunk').with(ensure: 'absent') }
                 it { is_expected.to contain_exec('stop_splunk').with(command: '/opt/splunk/bin/splunk stop') }
@@ -101,8 +103,8 @@ describe 'splunk::enterprise' do
                   "class { 'splunk::params': version => '6.0.0' }"
                 end
 
-                it_behaves_like 'splunk enterprise defaults'
-                it { is_expected.to contain_class('splunk::enterprise::service::nix') }
+                it_behaves_like 'splunk enterprise nix defaults'
+                it { is_expected.not_to contain_package('net-tools').with(ensure: 'installed') }
                 it { is_expected.to contain_class('splunk::enterprise').with(service_name: 'splunk') }
                 it { is_expected.not_to contain_file('/etc/init.d/splunk').with(ensure: 'absent') }
                 it { is_expected.to contain_exec('stop_splunk').with(command: '/opt/splunk/bin/splunk stop') }
@@ -117,11 +119,11 @@ describe 'splunk::enterprise' do
                   facts.merge(service_provider: 'systemd')
                 end
                 let(:pre_condition) do
-                  "class { 'splunk::params': version => '7.2.2' }"
+                  "class { 'splunk::params': version => '7.2.4.2' }"
                 end
 
-                it_behaves_like 'splunk enterprise defaults'
-                it { is_expected.to contain_class('splunk::enterprise::service::nix') }
+                it_behaves_like 'splunk enterprise nix defaults'
+                it { is_expected.to contain_package('net-tools').with(ensure: 'installed') }
                 it { is_expected.to contain_class('splunk::enterprise').with(service_name: 'Splunkd') }
                 it { is_expected.to contain_file('/etc/init.d/splunk').with(ensure: 'absent') }
                 it { is_expected.to contain_exec('stop_splunk').with(command: '/opt/splunk/bin/splunk stop') }
@@ -139,8 +141,8 @@ describe 'splunk::enterprise' do
                   "class { 'splunk::params': version => '6.0.0' }"
                 end
 
-                it_behaves_like 'splunk enterprise defaults'
-                it { is_expected.to contain_class('splunk::enterprise::service::nix') }
+                it_behaves_like 'splunk enterprise nix defaults'
+                it { is_expected.not_to contain_package('net-tools').with(ensure: 'installed') }
                 it { is_expected.to contain_class('splunk::enterprise').with(service_name: 'splunk') }
                 it { is_expected.not_to contain_file('/etc/init.d/splunk').with(ensure: 'absent') }
                 it { is_expected.to contain_exec('stop_splunk').with(command: '/opt/splunk/bin/splunk stop') }
@@ -161,11 +163,11 @@ describe 'splunk::enterprise' do
                   facts.merge(service_provider: 'init')
                 end
                 let(:pre_condition) do
-                  "class { 'splunk::params': version => '7.2.2', boot_start => false }"
+                  "class { 'splunk::params': version => '7.2.4.2', boot_start => false }"
                 end
 
-                it_behaves_like 'splunk enterprise defaults'
-                it { is_expected.to contain_class('splunk::enterprise::service::nix') }
+                it_behaves_like 'splunk enterprise nix defaults'
+                it { is_expected.to contain_package('net-tools').with(ensure: 'installed') }
                 it { is_expected.to contain_class('splunk::enterprise').with(service_name: 'splunk') }
                 it { is_expected.not_to contain_file('/etc/init.d/splunk').with(ensure: 'absent') }
                 it { is_expected.not_to contain_exec('stop_splunk') }
@@ -183,8 +185,8 @@ describe 'splunk::enterprise' do
                   "class { 'splunk::params': version => '6.0.0', boot_start => false }"
                 end
 
-                it_behaves_like 'splunk enterprise defaults'
-                it { is_expected.to contain_class('splunk::enterprise::service::nix') }
+                it_behaves_like 'splunk enterprise nix defaults'
+                it { is_expected.not_to contain_package('net-tools').with(ensure: 'installed') }
                 it { is_expected.to contain_class('splunk::enterprise').with(service_name: 'splunk') }
                 it { is_expected.not_to contain_file('/etc/init.d/splunk').with(ensure: 'absent') }
                 it { is_expected.not_to contain_exec('stop_splunk') }
@@ -199,11 +201,11 @@ describe 'splunk::enterprise' do
                   facts.merge(service_provider: 'systemd')
                 end
                 let(:pre_condition) do
-                  "class { 'splunk::params': version => '7.2.2', boot_start => false }"
+                  "class { 'splunk::params': version => '7.2.4.2', boot_start => false }"
                 end
 
-                it_behaves_like 'splunk enterprise defaults'
-                it { is_expected.to contain_class('splunk::enterprise::service::nix') }
+                it_behaves_like 'splunk enterprise nix defaults'
+                it { is_expected.to contain_package('net-tools').with(ensure: 'installed') }
                 it { is_expected.to contain_class('splunk::enterprise').with(service_name: 'Splunkd') }
                 it { is_expected.to contain_file('/etc/init.d/splunk').with(ensure: 'absent') }
                 it { is_expected.not_to contain_exec('stop_splunk') }
@@ -221,8 +223,8 @@ describe 'splunk::enterprise' do
                   "class { 'splunk::params': version => '6.0.0', boot_start => false }"
                 end
 
-                it_behaves_like 'splunk enterprise defaults'
-                it { is_expected.to contain_class('splunk::enterprise::service::nix') }
+                it_behaves_like 'splunk enterprise nix defaults'
+                it { is_expected.not_to contain_package('net-tools').with(ensure: 'installed') }
                 it { is_expected.to contain_class('splunk::enterprise').with(service_name: 'splunk') }
                 it { is_expected.not_to contain_file('/etc/init.d/splunk').with(ensure: 'absent') }
                 it { is_expected.not_to contain_exec('stop_splunk') }
