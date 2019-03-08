@@ -36,7 +36,7 @@
 define splunk::addon (
   Optional[Stdlib::Absolutepath] $splunk_home = undef,
   Boolead $package_manage                     = true,
-  Optional[String] $package_name              = undef,
+  Optional[String[1]] $package_name           = undef,
   $inputs                                     = {},
 ) {
 
