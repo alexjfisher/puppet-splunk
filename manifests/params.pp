@@ -290,9 +290,9 @@ class splunk::params (
   $forwarder_src_package  = "splunkforwarder-${package_suffix}"
   $enterprise_src_package = "splunk-${package_suffix}"
 
-  $enterprise_package_ensure = $version
+  $enterprise_package_ensure = 'installed'
   $enterprise_package_src    = "${src_root}/products/splunk/releases/${version}/${enterprise_src_subdir}/${enterprise_src_package}"
-  $forwarder_package_ensure = $version
+  $forwarder_package_ensure = 'installed'
   $forwarder_package_src = "${src_root}/products/universalforwarder/releases/${version}/${forwarder_src_subdir}/${forwarder_src_package}"
 
 
