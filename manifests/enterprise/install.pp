@@ -12,7 +12,7 @@ class splunk::enterprise::install {
   }
 
   if $splunk::enterprise::package_provider != undef and $splunk::enterprise::package_provider != 'yum' and $splunk::enterprise::package_provider != 'apt' and $splunk::enterprise::package_provider != 'chocolatey' {
-    include ::archive::staging
+    include archive::staging
     $_src_package_filename = basename($_package_source)
     $_package_path_parts   = [$archive::path, $splunk::enterprise::staging_subdir, $_src_package_filename]
     $_staged_package       = join($_package_path_parts, $splunk::enterprise::path_delimiter)
@@ -36,7 +36,6 @@ class splunk::enterprise::install {
     },
   }
 
-  #TODO: this should ensure on specified version
   package { $splunk::enterprise::enterprise_package_name:
     ensure          => $splunk::enterprise::enterprise_package_ensure,
     provider        => $splunk::enterprise::package_provider,

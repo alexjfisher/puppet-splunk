@@ -17,7 +17,14 @@ describe 'splunk enterprise class' do
       it { is_expected.to be_installed }
     end
 
-    describe service('splunk') do
+    init = shell('/bin/readlink /sbin/init', :acceptable_exit_codes => [0,1]).stdout
+    if init.include? 'systemd'
+      service_name = 'Splunkd'
+    else
+      service_name = 'splunk'
+    end
+
+    describe service(service_name) do
       it { is_expected.to be_enabled }
       it { is_expected.to be_running }
     end

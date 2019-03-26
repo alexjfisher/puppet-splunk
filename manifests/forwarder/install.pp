@@ -8,7 +8,7 @@ class splunk::forwarder::install {
   }
 
   if $splunk::forwarder::package_provider != undef and $splunk::forwarder::package_provider != 'yum' and $splunk::forwarder::package_provider != 'apt' and $splunk::forwarder::package_provider != 'chocolatey' {
-    include ::archive::staging
+    include archive::staging
     $_src_package_filename = basename($_package_source)
     $_package_path_parts   = [$archive::path, $splunk::forwarder::staging_subdir, $_src_package_filename]
     $_staged_package       = join($_package_path_parts, $splunk::forwarder::path_delimiter)
@@ -59,7 +59,6 @@ class splunk::forwarder::install {
     }
   }
 
-  #TODO: this should ensure on specified version
   package { $splunk::forwarder::forwarder_package_name:
     ensure          => $splunk::forwarder::forwarder_package_ensure,
     provider        => $splunk::forwarder::package_provider,

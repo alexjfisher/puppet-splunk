@@ -9,7 +9,6 @@ shared_examples_for 'splunk forwarder' do
   it { is_expected.to contain_class('splunk::forwarder::config') }
   it { is_expected.to contain_class('splunk::forwarder::service') }
   it { is_expected.to contain_splunk_config('splunk') }
-  it { is_expected.to contain_package('splunkforwarder').with(ensure: 'installed') }
   it { is_expected.to contain_file('/opt/splunkforwarder/etc/system/local/deploymentclient.conf') }
   it { is_expected.to contain_file('/opt/splunkforwarder/etc/system/local/outputs.conf') }
   it { is_expected.to contain_file('/opt/splunkforwarder/etc/system/local/inputs.conf') }
@@ -73,6 +72,7 @@ describe 'splunk::forwarder' do
                 end
 
                 it_behaves_like 'splunk forwarder'
+                it { is_expected.to contain_package('splunkforwarder').with(ensure: '7.2.2') }
                 it { is_expected.to contain_class('splunk::forwarder::service::nix') }
                 it { is_expected.to contain_class('splunk::forwarder').with(service_name: 'splunk') }
                 it { is_expected.to contain_exec('stop_splunkforwarder').with(command: '/opt/splunkforwarder/bin/splunk stop') }
@@ -91,6 +91,7 @@ describe 'splunk::forwarder' do
                 end
 
                 it_behaves_like 'splunk forwarder'
+                it { is_expected.to contain_package('splunkforwarder').with(ensure: '6.0.0') }
                 it { is_expected.to contain_class('splunk::forwarder::service::nix') }
                 it { is_expected.to contain_class('splunk::forwarder').with(service_name: 'splunk') }
                 it { is_expected.to contain_exec('stop_splunkforwarder').with(command: '/opt/splunkforwarder/bin/splunk stop') }
@@ -109,6 +110,7 @@ describe 'splunk::forwarder' do
                 end
 
                 it_behaves_like 'splunk forwarder'
+                it { is_expected.to contain_package('splunkforwarder').with(ensure: '7.2.2') }
                 it { is_expected.to contain_class('splunk::forwarder::service::nix') }
                 it { is_expected.to contain_class('splunk::forwarder').with(service_name: 'SplunkForwarder') }
                 it { is_expected.to contain_exec('stop_splunkforwarder').with(command: '/opt/splunkforwarder/bin/splunk stop') }
@@ -127,6 +129,7 @@ describe 'splunk::forwarder' do
                 end
 
                 it_behaves_like 'splunk forwarder'
+                it { is_expected.to contain_package('splunkforwarder').with(ensure: '6.0.0') }
                 it { is_expected.to contain_class('splunk::forwarder::service::nix') }
                 it { is_expected.to contain_class('splunk::forwarder').with(service_name: 'splunk') }
                 it { is_expected.to contain_exec('stop_splunkforwarder').with(command: '/opt/splunkforwarder/bin/splunk stop') }
@@ -151,6 +154,7 @@ describe 'splunk::forwarder' do
                 end
 
                 it_behaves_like 'splunk forwarder'
+                it { is_expected.to contain_package('splunkforwarder').with(ensure: '7.2.2') }
                 it { is_expected.to contain_class('splunk::forwarder::service::nix') }
                 it { is_expected.to contain_class('splunk::forwarder').with(service_name: 'splunk') }
                 it { is_expected.not_to contain_exec('stop_splunkforwarder') }
@@ -169,6 +173,7 @@ describe 'splunk::forwarder' do
                 end
 
                 it_behaves_like 'splunk forwarder'
+                it { is_expected.to contain_package('splunkforwarder').with(ensure: '6.0.0') }
                 it { is_expected.to contain_class('splunk::forwarder::service::nix') }
                 it { is_expected.to contain_class('splunk::forwarder').with(service_name: 'splunk') }
                 it { is_expected.not_to contain_exec('stop_splunkforwarder') }
@@ -187,6 +192,7 @@ describe 'splunk::forwarder' do
                 end
 
                 it_behaves_like 'splunk forwarder'
+                it { is_expected.to contain_package('splunkforwarder').with(ensure: '7.2.2') }
                 it { is_expected.to contain_class('splunk::forwarder::service::nix') }
                 it { is_expected.to contain_class('splunk::forwarder').with(service_name: 'SplunkForwarder') }
                 it { is_expected.not_to contain_exec('stop_splunkforwarder') }
@@ -205,6 +211,7 @@ describe 'splunk::forwarder' do
                 end
 
                 it_behaves_like 'splunk forwarder'
+                it { is_expected.to contain_package('splunkforwarder').with(ensure: '6.0.0') }
                 it { is_expected.to contain_class('splunk::forwarder::service::nix') }
                 it { is_expected.to contain_class('splunk::forwarder').with(service_name: 'splunk') }
                 it { is_expected.not_to contain_exec('stop_splunkforwarder') }
