@@ -6,30 +6,32 @@
 # no resources to the graph. Rather, it only sets values for parameters to be
 # consumed by child classes.
 #
-# Parameters:
-#
-# [*version*]
+# @param version
 #   The version of Splunk to install. This will be in the form x.y.z; e.g.
 #   "4.3.2".
 #
-# [*build*]
+# @param build
 #   Splunk packages are typically named based on the platform, architecture,
 #   version, and build. Puppet can determine the platform information
 #   automatically but a build number must be supplied in order to correctly
 #   construct the path to the packages. A build number will be six digits;
 #   e.g. "123586".
 #
-# [*splunkd_port*]
+# @param splunkd_port
 #   The splunkd port. Used as a default for both splunk and splunk::forwarder.
 #
-# [*logging_port*]
+# @param logging_port
 #   The port on which to send logs, and listen for logs. Used as a default for
 #   splunk and splunk::forwarder.
 #
-# [*splunk_user*]
+# @param server
+#   Optional fqdn or IP of the Splunk Enterprise server.  Used for setting up
+#   the default TCP output and input.
+#
+# @param splunk_user
 #   The user that splunk runs as.
 #
-# [*src_root*]
+# @param src_root
 #   The root URL at which to find the splunk packages. The sane-default logic
 #   assumes that the packages are located under this URL in the same way that
 #   they are placed on download.splunk.com. The URL can be any protocol that
@@ -73,13 +75,19 @@
 #                         ├── splunk-7.2.4.2-fb30470262e3-linux-2.6-intel.deb
 #                         └── splunk-7.2.4.2-fb30470262e3-linux-2.6-x86_64.rpm
 #
-# [*boot_start*]
+# @param boot_start
 #   Enable Splunk to start at boot, create a system service file.
 #
 #   WARNING: Toggling boot_start `false` to `true` will cause a restart of the
 #   splunk Enterprise and Forwarder services.
 #
 #   Defaults to true
+#
+# @param forwarder_installdir
+#   Optional directory in which to install and manage Splunk Forwarder
+#
+# @param enterprise_installdir
+#   Optional directory in which to install and manage Splunk Enterprise
 #
 # Actions:
 #
