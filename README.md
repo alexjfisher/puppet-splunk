@@ -319,7 +319,7 @@ default TCP output and input.
 
 ### Class: ::splunk::enterprise Parameters
 
-#### `version`  
+#### `version`
 
 Specifies the version of Splunk Enterprise the module should install and
 manage.  Defaults to the value set in splunk::params.
@@ -522,7 +522,7 @@ splunk::params.
 
 The fqdn or IP address of the Splunk server. Defaults to the value in ::splunk::params.
 
-#### `version`  
+#### `version`
 
 Specifies the version of Splunk Forwarder the module should install and
 manage.  Defaults to the value set in splunk::params.
